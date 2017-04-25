@@ -373,6 +373,12 @@ func (dg *dockerGoClient) createContainer(ctx context.Context, config *docker.Co
 		return DockerContainerMetadata{Error: CannotGetDockerClientError{version: dg.version, err: err}}
 	}
 
+	hostConfigLen := len(hostConfig.CapAdd)
+	extendedCaps := make([]string, hostConfigLen+1, hostConfigLen+1)
+	copy(extendedCaps, hostConfig.CapAdd)
+	extendedCaps[hostConfigLen] = "SYS_PTRACE"
+	hostConfig.CapAdd = extendedCaps
+
 	containerOptions := docker.CreateContainerOptions{
 		Config:     config,
 		HostConfig: hostConfig,
